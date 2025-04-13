@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Server Queueing Model Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the details summary */
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #4a5568; /* gray-700 */
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: #f7fafc; /* gray-100 */
+            border: 1px solid #e2e8f0; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.2s ease-in-out;
+        }
+        summary:hover {
+            background-color: #edf2f7; /* gray-200 */
+        }
+        /* Style for the formulas section */
+        .formulas-content {
+            margin-top: 0.5rem;
+            padding: 1rem;
+            border: 1px solid #e2e8f0; /* gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            background-color: #ffffff; /* white */
+        }
+        .formulas-content code {
+             background-color: #f7fafc; /* gray-100 */
+             padding: 0.1rem 0.3rem;
+             border-radius: 0.25rem;
+             font-family: monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="container max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+        <h1 class="text-2xl font-semibold text-blue-600 mb-6 text-center">Two-Server Queueing Model Calculator</h1>
+        <p class="mb-4 text-gray-700">
+            This calculator computes key metrics for a queueing system with two servers (M/M/2 model). You can use these results in your Excel calculations.
+        </p>
+
+        <div class="mb-4">
+            <label for="arrivalRate" class="block text-gray-700 text-sm font-bold mb-2">Arrival Rate (λ):</label>
+            <input type="number" id="arrivalRate" placeholder="e.g., 0.333" step="any" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <div class="mb-4">
+            <label for="serviceRate" class="block text-gray-700 text-sm font-bold mb-2">Service Rate per Server (μ):</label>
+            <input type="number" id="serviceRate" placeholder="e.g., 0.25" step="any" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+
+        <div class="flex items-center justify-between mb-4">
+            <button id="calculate" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Calculate</button>
+            <button id="reset" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Reset</button>
+        </div>
+
+        <div id="results" class="hidden mt-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Results:</h2>
+            <ul class="border rounded-md p-4 bg-gray-50">
+                <li class="mb-2"><span class="font-semibold text-gray-700">Traffic Intensity (ρ = λ/μ):</span> <span id="rho_val" class="text-blue-600"></span></li>
+                <li class="mb-2"><span class="font-semibold text-gray-700">Probability of 0 customers (P<sub>0</sub>):</span> <span id="p0" class="text-blue-600"></span></li>
+                <li class="mb-2"><span class="font-semibold text-gray-700">Probability of 1 customer (P<sub>1</sub>):</span> <span id="p1" class="text-blue-600"></span></li>
+                <li class="mb-2"><span class="font-semibold text-gray-700">Probability of waiting (P<sub>W</sub> = P<sub>n≥2</sub>):</span> <span id="pw" class="text-blue-600"></span></li>
+                <li class="mb-2"><span class="font-semibold text-gray-700">Average number in queue (L<sub>q</sub>):</span> <span id="lq" class="text-blue-600"></span></li>
+                <li class="mb-2"><span class="font-semibold text-gray-700">Average number in system (L):</span> <span id="l" class="text-blue-600"></span></li>
+                <li class="mb-2"><span class="font-semibold text-gray-700">Average time in queue (W<sub>q</sub>):</span> <span id="wq" class="text-blue-600"></span></li>
+                <li class="mb-2"><span class="font-semibold text-gray-700">Average time in system (W):</span> <span id="w" class="text-blue-600"></span></li>
+            </ul>
+        </div>
+
+        <p class="mt-4 text-gray-500 text-sm">
+            Important Note: Ensure that the arrival rate (λ) is less than twice the service rate (2μ) for the system to be stable.
+        </p>
+
+        <details class="mt-6">
+            <summary>Show Formulas Used (M/M/2 Model)</summary>
+            <div class="formulas-content text-sm text-gray-700 space-y-2">
+                <p>Where: <br>
+                   <code>λ</code> = Arrival Rate <br>
+                   <code>μ</code> = Service Rate per Server <br>
+                   <code>c</code> = Number of Servers (here, c=2)
+                </p>
+                <p><strong>Traffic Intensity (Offered Load):</strong><br> <code>ρ = λ / μ</code></p>
+                <p><strong>Server Utilization (Average proportion of time each server is busy):</strong><br> <code>Utilization = λ / (c * μ) = ρ / c = ρ / 2</code></p>
+                <p><strong>Probability of Zero Customers (P<sub>0</sub>):</strong><br> <code>P<sub>0</sub> = 1 / [ 1 + ρ + (ρ<sup>2</sup> / (2 * (1 - ρ/2))) ]</code> <br> (Requires ρ/2 < 1, which means λ < 2μ)</p>
+                <p><strong>Probability of One Customer (P<sub>1</sub>):</strong><br> <code>P<sub>1</sub> = ρ * P<sub>0</sub></code></p>
+                <p><strong>Probability of Waiting (P<sub>W</sub> = P<sub>n≥c</sub> = P<sub>n≥2</sub>):</strong><br> <code>P<sub>W</sub> = (ρ<sup>c</sup> / (c! * (1 - ρ/c))) * P<sub>0</sub> = (ρ<sup>2</sup> / (2 * (1 - ρ/2))) * P<sub>0</sub></code><br> Also calculated as: <code>1 - P<sub>0</sub> - P<sub>1</sub></code></p>
+                <p><strong>Average Number of Customers in the Queue (L<sub>q</sub>):</strong><br> <code>L<sub>q</sub> = [ ρ<sup>c+1</sup> / ( (c-1)! * (c - ρ)<sup>2</sup> ) ] * P<sub>0</sub></code> (General formula)<br> For c=2: <code>L<sub>q</sub> = [ ρ<sup>3</sup> / ( (2-1)! * (2 - ρ)<sup>2</sup> ) ] * P<sub>0</sub> = [ ρ<sup>3</sup> / (2 - ρ)<sup>2</sup> ] * P<sub>0</sub></code> <br> *Note: The code uses an equivalent formulation based on P<sub>W</sub>: <code>L<sub>q</sub> = P<sub>W</sub> * (ρ / (c - ρ)) = P<sub>W</sub> * (ρ / (2 - ρ))</code>*</p>
+                <p><strong>Average Number of Customers in the System (L):</strong><br> <code>L = L<sub>q</sub> + λ/μ = L<sub>q</sub> + ρ</code></p>
+                <p><strong>Average Waiting Time in the Queue (W<sub>q</sub>):</strong><br> <code>W<sub>q</sub> = L<sub>q</sub> / λ</code></p>
+                <p><strong>Average Waiting Time in the System (W):</strong><br> <code>W = W<sub>q</sub> + 1/μ</code></p>
+
+            </div>
+        </details>
+
+    </div>
+
+    <script>
+        document.getElementById('calculate').addEventListener('click', function() {
+            const arrivalRate = parseFloat(document.getElementById('arrivalRate').value);
+            const serviceRate = parseFloat(document.getElementById('serviceRate').value);
+            const numServers = 2; // Explicitly define c=2
+
+            // Input validation
+            if (isNaN(arrivalRate) || arrivalRate <= 0 || isNaN(serviceRate) || serviceRate <= 0) {
+                alert("Please enter valid positive numeric values for arrival and service rates.");
+                resetResults();
+                return;
+            }
+
+            // Stability check: arrival rate must be less than total service capacity
+            if (arrivalRate >= numServers * serviceRate) {
+                alert(`Arrival rate (λ=${arrivalRate.toFixed(3)}) must be less than total service rate (${numServers}μ = ${(numServers * serviceRate).toFixed(3)}) for stability.`);
+                resetResults();
+                return;
+            }
+
+            // --- Calculations ---
+            const rho = arrivalRate / serviceRate; // Traffic intensity (offered load)
+            const utilization = rho / numServers; // Server utilization
+
+            // Calculate P0 (Probability of zero customers)
+            const p0_denominator_part3 = (Math.pow(rho, numServers + 1) / (numServers * factorial(numServers) * (1 - utilization))); // This is related to Pw calculation
+            const p0_denominator_term3 = (Math.pow(rho, numServers) / factorial(numServers)) * (1 / (1 - utilization)); // P0 term for n >= c
+            let p0_denominator_sum_terms = 0;
+            for(let n=0; n < numServers; n++){
+                p0_denominator_sum_terms += Math.pow(rho, n) / factorial(n);
+            }
+            const p0 = 1 / (p0_denominator_sum_terms + p0_denominator_term3);
+
+
+            // Calculate P1 (Probability of one customer) - specific for c=2
+            const p1 = (rho * p0); // Pn = (rho^n / n!) * P0 for n < c
+
+            // Calculate Pw (Probability of waiting = P(n >= c))
+            const pw = p0_denominator_term3 * p0; // Probability an arriving customer has to wait
+
+            // Calculate Lq (Average number in queue)
+            // Using the formula Lq = Pw * (utilization / (1 - utilization)) or Lq = Pw * (rho / (c - rho))
+            const lq = pw * (utilization / (1 - utilization));
+            // Alternative Lq formula for M/M/c: (rho^(c+1) / ((c-1)! * (c - rho)^2)) * P0
+            // For c=2: (rho^3 / (1! * (2 - rho)^2)) * P0 = (rho^3 / (2 - rho)^2) * P0
+            // Let's verify: const lq_alt = (Math.pow(rho, 3) / Math.pow(numServers - rho, 2)) * p0; // This should match lq
+
+
+            // Calculate L (Average number in system)
+            const l = lq + rho; // L = Lq + lambda/mu
+
+            // Calculate Wq (Average time in queue)
+            const wq = lq / arrivalRate;
+
+            // Calculate W (Average time in system)
+            const w = wq + (1 / serviceRate);
+
+            // --- Display Results ---
+            document.getElementById('rho_val').textContent = rho.toFixed(4);
+            document.getElementById('p0').textContent = p0.toFixed(4);
+            document.getElementById('p1').textContent = p1.toFixed(4); // Display P1
+            document.getElementById('pw').textContent = pw.toFixed(4); // Display Pw (renamed from P2+)
+            document.getElementById('lq').textContent = lq.toFixed(4);
+            // document.getElementById('lq').textContent = `${lq.toFixed(4)} (Alt: ${lq_alt.toFixed(4)})`; // Uncomment to show verification
+            document.getElementById('l').textContent = l.toFixed(4);
+            document.getElementById('wq').textContent = wq.toFixed(4);
+            document.getElementById('w').textContent = w.toFixed(4);
+
+            document.getElementById('results').classList.remove('hidden');
+        });
+
+        document.getElementById('reset').addEventListener('click', function() {
+            document.getElementById('arrivalRate').value = '';
+            document.getElementById('serviceRate').value = '';
+            resetResults();
+        });
+
+        // Helper function to reset results display
+        function resetResults() {
+             document.getElementById('results').classList.add('hidden');
+             // Optionally clear the text content as well
+             const resultSpans = document.querySelectorAll('#results span[id]');
+             resultSpans.forEach(span => span.textContent = '');
+        }
+
+        // Helper function for factorial
+        function factorial(n) {
+            if (n < 0) return NaN; // Factorial is not defined for negative numbers
+            if (n === 0 || n === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+
+        // More robust P0 calculation (using standard M/M/c formula)
+        // This function is now integrated directly into the click handler for clarity
+        /*
+        function calculateP0_MMc(rho, c) {
+            const utilization = rho / c;
+            if (utilization >= 1) return 0; // System unstable or saturated
+
+            let sum_terms = 0;
+            for (let n = 0; n < c; n++) {
+                sum_terms += Math.pow(rho, n) / factorial(n);
+            }
+            const last_term = (Math.pow(rho, c) / factorial(c)) * (1 / (1 - utilization));
+            return 1 / (sum_terms + last_term);
+        }
+        */
+
+    </script>
+</body>
+</html>
